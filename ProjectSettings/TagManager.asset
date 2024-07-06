@@ -41,3 +41,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: CreatureUi
+    uniqueID: 1199700275
+    locked: 0
