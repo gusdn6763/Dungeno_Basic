@@ -24,6 +24,9 @@ public class Creature : InteractionObject
     [Header("감지 확률")]
     public float detectValue;
 
+    [Header("속도")]
+    public float speed;
+
     protected override bool Init()
     {
         if (base.Init() == false)
@@ -42,6 +45,11 @@ public class Creature : InteractionObject
         creaturePartUi = GetComponentInChildren<CreaturePartUi>();
         creaturePartUi.Init();
         return true;
+    }
+
+    void OnBecameInvisible() //화면밖으로 나가 보이지 않게 되면 호출이 된다.
+    {
+        Destroy(gameObject); //객체를 삭제한다.
     }
 
     public override void Spawn()
@@ -123,7 +131,7 @@ public class Creature : InteractionObject
     }
     protected virtual void UpdateRun()
     {
-
+        transform.Translate(new Vector3(runPositionX * speed, runPositionY * speed));
     }
     protected virtual void UpdateDead()
     {
@@ -136,7 +144,7 @@ public class Creature : InteractionObject
     {
         if(currentState != monsterState)
         {
-            switch (currentState)
+            switch (monsterState)
             {
                 case E_MonsterState.Battle:
                     EnterBattle();
@@ -157,8 +165,8 @@ public class Creature : InteractionObject
     private float runPositionY;
     public void EnterRun()
     {
-        runPositionX = UnityEngine.Random.Range(-1, 1);
-        runPositionY = UnityEngine.Random.Range(-1, 1);
+        runPositionX = UnityEngine.Random.Range(-1f, 1f);
+        runPositionY = UnityEngine.Random.Range(-1f, 1f);
     }
     #endregion
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Define;
 
 public class Player : BaseObject
 {
@@ -25,8 +26,15 @@ public class Player : BaseObject
     [Header("µ¥¹ÌÁö")]
     [SerializeField] private float damage;
     public float Damage { get => damage; private set => damage = value; }
-    protected override bool Init()
+
+    public void Damaged(E_PartType partType, float damage)
     {
-        return true;
+        for(int i = 0; i < parts.Count; i++)
+        {
+            if (parts[i].PartType == partType)
+            {
+                parts[i].Damaged(damage);
+            }
+        }
     }
 }

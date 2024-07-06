@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Define;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private PlayerUi playerUi;
     [SerializeField] private PlayerPartUi partUi;
 
-    [Header("턴 제한 시간")]
+    [Header("플레이어 턴 시간")]
     [SerializeField] private float playerTurnTime = 0;
     public float PlayerTurnTime { get => playerTurnTime; }
 
@@ -31,8 +32,6 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public float PlayerDamege { get => player.Damage; }
-
     public void Init()
     {
         CurrentLocation = "던전";
@@ -45,5 +44,25 @@ public class PlayerManager : MonoBehaviour
     public void SelectAttackType(int number)
     {
         CurrentAttackType = number;
+    }
+
+    public void Damaged(E_PartType partType, float damage)
+    {
+        player.Damaged(partType, damage);
+    }
+
+    public void PlayerAttack(PartButton button)
+    {
+        if (playerCanAttack)
+        {
+            button.Damaged(player.Damage);
+            playerCanAttack = false;
+        }
+    }
+
+
+    IEnumerator PlayerTurnCoroutine()
+    {
+
     }
 }

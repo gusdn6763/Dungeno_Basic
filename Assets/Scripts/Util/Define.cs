@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class Define
 {
+    public enum E_PartType
+    {
+        Head,
+        Chest,
+        LeftArm,
+        RightArm,
+        LeftLeg,
+        RightLeg
+    }
+
     public enum E_MonsterState
     {
         None,

@@ -1,16 +1,7 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine;
-
-public enum PartType
-{
-    Head,
-    Chest,
-    LeftArm,
-    RightArm,
-    LeftLeg,
-    RightLeg
-}
+using static Define;
 
 [System.Serializable]
 public class Part
@@ -20,7 +11,8 @@ public class Part
     public Action<Part, float> OnDamaged;
     public Action<Part> OnBroken;
 
-    public PartType partType;
+    [SerializeField] private E_PartType partType;
+    public E_PartType PartType { get => partType; }
 
     public float fullHp;
     public float FullHp { get { return fullHp; } }

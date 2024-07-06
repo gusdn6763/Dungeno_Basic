@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class PlayerUi : UIScript
 {
-    public Player currentPlayer { get; set; }
+    public Player CurrentPlayer { get; set; }
 
     [Header("UI")]
     [SerializeField] private IntroduceText messagePrefab;
@@ -29,14 +29,14 @@ public class PlayerUi : UIScript
 
     public void Init(Player player)
     {
-        currentPlayer = player;
+        CurrentPlayer = player;
 
         currentLocation.text = Managers.Player.CurrentLocation;
         currentTime.text = TimeConverter.AddTime(0);
 
-        hpSlider.Initialize(currentPlayer.Hp);
-        hungrySlider.Initialize(currentPlayer.Hungry);
-        fatigueSlider.Initialize(currentPlayer.Fatigue);
+        hpSlider.Initialize(CurrentPlayer.Hp);
+        hungrySlider.Initialize(CurrentPlayer.Hungry);
+        fatigueSlider.Initialize(CurrentPlayer.Fatigue);
         ClearPreview();
     }
 
@@ -58,9 +58,9 @@ public class PlayerUi : UIScript
 
     public void ShowStatus()
     {
-        hpSlider.PreviewValue += currentPlayer.Hp;
-        hungrySlider.PreviewValue += currentPlayer.Hungry;
-        fatigueSlider.PreviewValue += currentPlayer.Fatigue;
+        hpSlider.PreviewValue += CurrentPlayer.Hp;
+        hungrySlider.PreviewValue += CurrentPlayer.Hungry;
+        fatigueSlider.PreviewValue += CurrentPlayer.Fatigue;
     }
 
     public void CreateMessage(string message)

@@ -14,6 +14,6 @@ public class GameManager : MonoBehaviour
 
     public void GameStart()
     {
-        area.GameStateEnter(Define.E_GameState.Exploring);
+        area.ExplorEnd();
     }
 }

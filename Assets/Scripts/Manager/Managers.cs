@@ -15,8 +15,6 @@ public class Managers : MonoBehaviour
     public static PlayerManager Player { get { return Instance?.playerManager; } }
     public static UIManager UI { get { return Instance?.uiManager; } }
 
-    public static DummyManager Dummy { get; }
-
     private void Awake()
     {
         Init();
@@ -39,6 +37,7 @@ public class Managers : MonoBehaviour
             Application.targetFrameRate = 60;
 
             Game.Init();
+            Player.Init();
         }
     }
 }

@@ -14,8 +14,14 @@ public class PartButton : Button
     {
         CurrentPart = part;
         Managers.Player.OnPlayerCanAttackEvent += IsInteractable;
-        onClick.AddListener(Damaged);
+        onClick.AddListener(() => Managers.Player.PlayerAttack(this));
         slider = GetComponentInChildren<Slider>();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        Managers.Player.OnPlayerCanAttackEvent -= IsInteractable;
     }
 
     public void IsInteractable(bool isActive)
@@ -34,12 +40,8 @@ public class PartButton : Button
         slider.value = radio;
     }
 
-    public void Damaged()
+    public void Damaged(float damage)
     {
-        //다시한번 체크
-        if(Managers.Player.PlayerCanAttack)
-        {
-            CurrentPart.Damaged(Managers.Player.PlayerDamege);
-        }
+        CurrentPart.Damaged(damage);
     }
 }

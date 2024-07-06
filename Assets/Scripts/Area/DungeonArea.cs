@@ -113,7 +113,7 @@ public class DungeonArea : Area
 
         if(CheckBattleStateMonster())
         {
-            Battle();         
+            BattleStart();         
         }
         else
         {
@@ -315,18 +315,16 @@ public class DungeonArea : Area
         }
     }
 
+    #endregion
+
+    #region 전투 관련
     public void PlayerFirstAttack(int creatureLevel)
     {
         FightMonsterLevel = creatureLevel;
 
         if (CheckBattleStateMonster())
-            Battle();
+            BattleStart();
     }
-
-    #endregion
-
-    #region 전투 관련
-
     public bool CheckBattleStateMonster()
     {
         List<Creature> allMonsters = FindTypeObjects<Creature>();
@@ -339,16 +337,24 @@ public class DungeonArea : Area
         }
         return false;
     }
-
-    public void Battle()
+    public void BattleStart()
     {
         SetHighLevelMonsterBehavior();
         SetMidLevelMonsterBehavior();
         SetLowLevelMonsterBehavior();
         GameStateEnter(E_GameState.Battle_Start);
     }
-    #endregion
 
+    protected override void HandleOnDead(InteractionObject obj)
+    {
+        base.HandleOnDead(obj);
+
+        if(CheckBattleStateMonster())
+        {
+
+        }
+    }
+    #endregion
     public void UpdateObjectLifetimes()
     {
         for (int i = 0; i < interactionObjects.Count; i++)

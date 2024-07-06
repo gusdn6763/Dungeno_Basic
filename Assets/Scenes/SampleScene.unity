@@ -1321,15 +1321,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   messagePrefab: {fileID: -7669506393225072442, guid: 58a32bfd758c1eb4f93c51399c933e2b, type: 3}
   messagePosition: {fileID: 695912844}
-  hpSlider: {fileID: 0}
-  hungrySlider: {fileID: 0}
-  fatigueSlider: {fileID: 0}
-  currentLocation: {fileID: 0}
-  currentImage: {fileID: 0}
-  currentTime: {fileID: 0}
-  previewLocation: {fileID: 0}
-  previewImage: {fileID: 0}
-  previewTime: {fileID: 0}
+  hpSlider: {fileID: 1325556180}
+  hungrySlider: {fileID: 1592662823}
+  fatigueSlider: {fileID: 822741414}
+  currentLocation: {fileID: 1927142599}
+  currentImage: {fileID: 2052779087}
+  currentTime: {fileID: 785004043}
+  previewLocation: {fileID: 1774987381}
+  previewImage: {fileID: 899431192}
+  previewTime: {fileID: 471600342}
 --- !u!1 &400506031
 GameObject:
   m_ObjectHideFlags: 0
@@ -3464,7 +3464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactionObjects: []
   currentE_GameState: 0
-  advantureCountTime: 1
+  advantureCountTime: 5
   currentAdvantureTime: 0
   advantureCountAddTime: 5
   spawnValueDic:

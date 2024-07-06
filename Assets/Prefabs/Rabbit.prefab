@@ -722,6 +722,7 @@ MonoBehaviour:
     currentHp: 10
     partButton: {fileID: 5151185868525719807}
   detectValue: 35
+  speed: 0.1
   currentState: 0
 --- !u!1 &1811924498971740236
 GameObject:
