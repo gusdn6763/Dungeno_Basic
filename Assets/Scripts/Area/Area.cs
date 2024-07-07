@@ -8,6 +8,11 @@ public class Area : MonoBehaviour
     [Header("확인용-지역에 존재하는 오브젝트")]
     public List<InteractionObject> interactionObjects = new List<InteractionObject>();
 
+    public virtual void StateEnter()
+    {
+
+    }
+
     protected virtual void HandleOnDead(InteractionObject obj)
     {
         interactionObjects.Remove(obj);     

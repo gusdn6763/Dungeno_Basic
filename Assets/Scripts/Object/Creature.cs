@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Define;
 
@@ -26,7 +27,6 @@ public class Creature : InteractionObject
 
     [Header("속도")]
     public float speed;
-
     protected override bool Init()
     {
         if (base.Init() == false)
@@ -59,37 +59,6 @@ public class Creature : InteractionObject
     }
 
     #region AI
-
-    [Header("확인용-현재상태")]
-    [SerializeField] protected E_MonsterState currentState = E_MonsterState.None;
-
-    public E_MonsterState CurrentState
-    {
-        get
-        {
-            return currentState;
-        }
-        set
-        {
-            StateEnter(value);
-            currentState = value;
-        }
-    }
-
-    public bool Detect()
-    {
-        return UnityEngine.Random.value <= detectValue / 100f;
-    }
-
-    public virtual void DetectAction()
-    {
-        CurrentState = E_MonsterState.Battle;
-    }
-
-    public virtual void DamagedAction()
-    {
-        CurrentState = E_MonsterState.Battle;
-    }
 
     #region 실시간
     protected virtual IEnumerator StateUpdate()
@@ -142,50 +111,125 @@ public class Creature : InteractionObject
     #region 상태 최초 실행
     public void StateEnter(E_MonsterState monsterState)
     {
-        if(currentState != monsterState)
+        if (currentState != monsterState)
         {
             switch (monsterState)
             {
-                case E_MonsterState.Battle:
-                    EnterBattle();
-                    break;
                 case E_MonsterState.Run:
                     EnterRun();
                     break;
+                case E_MonsterState.Battle:
+                    EnterBattle();
+                    break;
+                case E_MonsterState.BattleWait:
+                    EnterWait();
+                    break;
+                case E_MonsterState.Dead:
+                    EnterDead();
+                    break;
             }
         }
-    }
-
-    public void EnterBattle()
-    {
-
     }
 
     private float runPositionX;
     private float runPositionY;
     public void EnterRun()
     {
+        text.color = Color.blue;
         runPositionX = UnityEngine.Random.Range(-1f, 1f);
         runPositionY = UnityEngine.Random.Range(-1f, 1f);
     }
+
+    public void EnterBattle()
+    {
+        text.color = Color.red;
+    }
+
+    public void EnterWait()
+    {
+        text.color = Color.red;
+    }
+
+    public void EnterDead()
+    {
+        Destroy(gameObject);
+    }
     #endregion
 
+    #region 상태 
+    [Header("확인용-현재상태")]
+    [SerializeField] protected E_MonsterState currentState = E_MonsterState.None;
 
+    public E_MonsterState CurrentState
+    {
+        get
+        {
+            return currentState;
+        }
+        set
+        {
+            StateEnter(value);
+            currentState = value;
+        }
+    }
+
+    public bool Detect()
+    {
+        if (currentState == E_MonsterState.Idle)
+            return UnityEngine.Random.value <= detectValue / 100f;
+        else
+            return false;
+    }
+
+    public virtual void DetectAction()
+    {
+        CurrentState = E_MonsterState.Battle;
+    }
+
+    public virtual void DamagedAction()
+    {
+        CurrentState = E_MonsterState.Battle;
+    }
+    #endregion
+
+    #region Battle
+    protected virtual void OnDead()
+    {
+        CurrentState = E_MonsterState.Dead;
+    }
     public void Damaged(Part part, float damage)
     {
-        if(true)
-        {
-            //플레이어 선공
-            OnDamagedEvent?.Invoke(Index);
-        }
-        else
-        {
-
-        }
+        DamagedAction();
+        //플레이어 선공
+        OnDamagedEvent?.Invoke(Index);
     }
     public void BrokenPart(Part part)
     {
-
+        if (part.PartType == E_PartType.Chest || part.PartType == E_PartType.Head)
+            OnDead();
     }
     #endregion
+
+    #endregion
+
+    public bool HavePart(E_PartType partType)
+    {
+        for(int i = 0; i < parts.Count; i++)
+        {
+            if (parts[i].PartType == partType)
+                return true;
+        }
+        return false;
+    }
+
+    public Part GetPart(E_PartType partType)
+    {
+        Part part = null;
+        for (int i = 0; i < parts.Count; i++)
+        {
+            if (parts[i].PartType == partType)
+                return parts[i];
+        }
+        return part;
+    }
 }

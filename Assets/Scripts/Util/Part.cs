@@ -39,11 +39,11 @@ public class Part
 public class CreaturePart : Part
 {
     public PartButton partButton;
-    private Creature owner;
+    public Creature Owner;
 
     public void Init(Creature creature)
     {
-        owner = creature;
+        Owner = creature;
         partButton.Init(this);
     }
 

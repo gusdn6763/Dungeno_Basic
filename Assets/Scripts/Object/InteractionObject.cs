@@ -53,7 +53,7 @@ public class InteractionObject : BaseObject
         else
             return GetComponent<RectTransform>().sizeDelta;
     }
-    protected void OnDestroy()
+    protected virtual void OnDestroy()
     {
         EventOnDead?.Invoke(this);
         Managers.Object.Despawn(this);

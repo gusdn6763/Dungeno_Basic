@@ -6,15 +6,6 @@ using static Define;
 
 public class DungeonArea : Area
 {
-    [Header("현재 게임 상태")]
-    [SerializeField] E_GameState currentE_GameState;
-
-    [Header("탐험 카운트 시간")]
-    [SerializeField] private float advantureCountTime;
-
-    [Header("확인용-현재시간")]
-    [SerializeField] private float currentAdvantureTime = 0f;
-
     [Header("탐험 카운트 시간 증가량")]
     [SerializeField] private float advantureCountAddTime;
 
@@ -26,78 +17,18 @@ public class DungeonArea : Area
 
     public int FightMonsterLevel { get; set; }
 
-    #region Update 실시간 실행
-    void Update()
+    #region 상태 변화시 1회 실행
+    public override void StateEnter()
     {
-        //더블클릭 또는 스페이스바시 시작 상태를 변경
-        HandleInput();
-
-        //게임 상태별 진행
-        GameStateUpdate();
-    }
-
-    public void GameStateUpdate()
-    {
-        switch (currentE_GameState)
+        switch (Managers.Game.CurrentGameState)
         {
-            case E_GameState.Exploring:
-                ProcessExplorationTime();
+            case E_GameState.Explor_End:
+                ExplorEnd();
                 break;
             case E_GameState.Battle_Start:
-                ProcessPlayerBattleTurn();
                 break;
         }
-    }
-    
-    public void ProcessExplorationTime()
-    {
-        currentAdvantureTime += Time.deltaTime;
-
-        if (currentAdvantureTime >= advantureCountTime)
-        {
-            currentAdvantureTime = 0;
-            GameStateEnter(E_GameState.Explor_End);
-        }
-    }
-
-    private float playerTurnTime = 0;
-
-    public void ProcessPlayerBattleTurn()
-    {
-        playerTurnTime += Time.deltaTime;
-
-        if (playerTurnTime >= Managers.Player.PlayerTurnTime)
-        {
-            PlayerAttack();
-        }
-    }
-
-    public void PlayerAttack()
-    {
-        playerTurnTime = 0;
-        if (Managers.Player.CurrentAttackType == 1)
-        {
-
-        }
-    }
-    #endregion
-
-    #region 상태 변화시 1회 실행
-    public void GameStateEnter(E_GameState gameState)
-    {
-        if (gameState != currentE_GameState)
-        {
-            currentE_GameState = gameState;
-
-            switch (currentE_GameState)
-            {
-                case E_GameState.Explor_End:
-                    ExplorEnd();
-                    break;
-                case E_GameState.Battle_Start:
-                    break;
-            }
-        }
+        
     }
 
     public void ExplorEnd()
@@ -111,58 +42,17 @@ public class DungeonArea : Area
 
         CheckMonsterDetection();
 
-        if(CheckBattleStateMonster())
+        if(HaveStateMonster(E_MonsterState.Battle))
         {
             BattleStart();         
         }
         else
         {
             UpdateObjectLifetimes();
-            GameStateEnter(E_GameState.Exploring);
+            Managers.Game.GameStateEnter(E_GameState.Exploring);
         }
     }
 
-    #endregion
-
-    #region 더블클릭
-
-    [Header("더블클릭 제한시간")]
-    public float m_DoubleClickSecond = 0.25f;
-    private bool m_IsOneClick = false;
-    private double m_Timer = 0;
-    private void HandleInput()
-    {
-        if (CheckDoubleClick() || Input.GetKeyDown(KeyCode.Space))
-        {
-            if (currentE_GameState == E_GameState.Exploring)
-                GameStateEnter(E_GameState.Explore_Stop);
-            else if (currentE_GameState == E_GameState.Explore_Stop)
-                GameStateEnter(E_GameState.Exploring);
-        }
-    }
-
-    public bool CheckDoubleClick()
-    {
-        if (m_IsOneClick && ((Time.time - m_Timer) > m_DoubleClickSecond))
-        {
-            m_IsOneClick = false;
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (!m_IsOneClick)
-            {
-                m_Timer = Time.time;
-                m_IsOneClick = true;
-            }
-            else if (m_IsOneClick && ((Time.time - m_Timer) < m_DoubleClickSecond))
-            {
-                m_IsOneClick = false;
-                return true;
-            }
-        }
-        return false;
-    }
     #endregion
 
     #region 던전 몹 생성
@@ -202,7 +92,7 @@ public class DungeonArea : Area
                     spawnObject.EventOnDead += HandleOnDead;
 
                     if (spawnObject is Creature) 
-                        (spawnObject as Creature).OnDamagedEvent += PlayerFirstAttack;
+                        (spawnObject as Creature).OnDamagedEvent += PlayerMonsterAttack;
 
                     interactionObjects.Add(spawnObject);
 
@@ -275,7 +165,6 @@ public class DungeonArea : Area
                 int value = UnityEngine.Random.Range(0, 4);
 
                 //0은 즉시 참여
-                Debug.Log("즉시 참여,연속 참여,무관심,도망");
                 if (value == 0)     //즉시 참여
                     FightMonsterLevel = creature.Index;
                 if (value == 1)     //연속 참여
@@ -318,21 +207,21 @@ public class DungeonArea : Area
     #endregion
 
     #region 전투 관련
-    public void PlayerFirstAttack(int creatureLevel)
+    public void PlayerMonsterAttack(int creatureLevel)
     {
         FightMonsterLevel = creatureLevel;
 
-        if (CheckBattleStateMonster())
+        if (HaveStateMonster(E_MonsterState.Battle))
             BattleStart();
     }
-    public bool CheckBattleStateMonster()
+    public bool HaveStateMonster(E_MonsterState monsterState)
     {
         List<Creature> allMonsters = FindTypeObjects<Creature>();
         for (int i = 0; i < allMonsters.Count; i++)
         {
             Creature creature = allMonsters[i];
 
-            if (creature.CurrentState == E_MonsterState.Battle)
+            if (creature.CurrentState == monsterState)
                 return true;
         }
         return false;
@@ -342,14 +231,18 @@ public class DungeonArea : Area
         SetHighLevelMonsterBehavior();
         SetMidLevelMonsterBehavior();
         SetLowLevelMonsterBehavior();
-        GameStateEnter(E_GameState.Battle_Start);
+        Managers.Game.GameStateEnter(E_GameState.Battle_Start);
     }
 
     protected override void HandleOnDead(InteractionObject obj)
     {
         base.HandleOnDead(obj);
 
-        if(CheckBattleStateMonster())
+        if(HaveStateMonster(E_MonsterState.Battle))
+        {
+
+        }
+        else if (HaveStateMonster(E_MonsterState.BattleWait))
         {
 
         }

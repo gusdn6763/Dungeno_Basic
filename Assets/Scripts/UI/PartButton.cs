@@ -4,32 +4,38 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PartButton : Button
+public class PartButton : MonoBehaviour
 {
     private Slider slider;
+    private Button button;
 
-    public Part CurrentPart { get; set; }
+    public CreaturePart CurrentPart { get; set; }
 
-    public void Init(Part part)
+    public void Init(CreaturePart part)
     {
         CurrentPart = part;
-        Managers.Player.OnPlayerCanAttackEvent += IsInteractable;
-        onClick.AddListener(() => Managers.Player.PlayerAttack(this));
+
+        button = GetComponent<Button>();
         slider = GetComponentInChildren<Slider>();
+
+        IsInteractable(true);
+        Managers.Player.CanSelectEvent += IsInteractable;
+        part.Owner.EventOnDead += PartDestory;
+        button.onClick.AddListener(() => Managers.Player.SelectAttackPart(this));
     }
 
-    protected override void OnDestroy()
+    protected void PartDestory(InteractionObject obj)
     {
-        base.OnDestroy();
-        Managers.Player.OnPlayerCanAttackEvent -= IsInteractable;
+        Managers.Player.CanSelectEvent -= IsInteractable;
     }
 
     public void IsInteractable(bool isActive)
     {
-        if (CurrentPart.IsBroken)
-            interactable = false;
+        //부위가 파괴되었거나 선택하지 않았을 경우
+        if (CurrentPart.IsBroken || Managers.Player.PartCanSelect == false)
+            button.interactable = false;
         else
-            interactable = isActive;
+            button.interactable = isActive;
     }
 
     public void Refresh(float radio)
@@ -38,10 +44,5 @@ public class PartButton : Button
             IsInteractable(false);
 
         slider.value = radio;
-    }
-
-    public void Damaged(float damage)
-    {
-        CurrentPart.Damaged(damage);
     }
 }
