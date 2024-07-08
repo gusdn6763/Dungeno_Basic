@@ -5,8 +5,6 @@ using static Define;
 
 public class InteractionObject : BaseObject
 {
-    public event Action<InteractionObject> EventOnDead;
-
     [Header("번호")]
     [SerializeField] private int index;
     public int Index { get => index; private set => index = value; }
@@ -53,11 +51,6 @@ public class InteractionObject : BaseObject
         else
             return GetComponent<RectTransform>().sizeDelta;
     }
-    protected virtual void OnDestroy()
-    {
-        EventOnDead?.Invoke(this);
-        Managers.Object.Despawn(this);
-    }
 
     public virtual void Spawn()
     {
@@ -70,7 +63,12 @@ public class InteractionObject : BaseObject
         if (currentLifetime >= maxLifetime)
         {
             Debug.Log(commandName + "삭제");
-            Destroy(gameObject);
+            DestoryObject();
         }
+    }
+
+    public virtual void DestoryObject()
+    {
+        Managers.Object.Despawn(this);
     }
 }

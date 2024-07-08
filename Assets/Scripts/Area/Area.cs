@@ -1,21 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class Area : MonoBehaviour
 {
     [Header("확인용-지역에 존재하는 오브젝트")]
     public List<InteractionObject> interactionObjects = new List<InteractionObject>();
 
-    public virtual void StateEnter()
-    {
+    [SerializeField] private string areaName;
+    public string AreaName { get => areaName; }
 
-    }
-
-    protected virtual void HandleOnDead(InteractionObject obj)
+    public void DestoryArea(InteractionObject obj)
     {
-        interactionObjects.Remove(obj);     
+        if(interactionObjects.Contains(obj))
+            interactionObjects.Remove(obj);     
     }
 
     public List<T> FindTypeObjects<T>() where T : InteractionObject

@@ -6,54 +6,32 @@ using static Define;
 
 public class DungeonArea : Area
 {
-    [Header("탐험 카운트 시간 증가량")]
-    [SerializeField] private float advantureCountAddTime;
-
     [Header("오브젝트 스폰 갯수 확률")]
     public SerializableDictionary<int, float> spawnValueDic;
 
     [Header("오브젝트 스폰 확률")]
     public SerializableDictionary<InteractionObject, float> InteractionObjDic;
 
-    public int FightMonsterLevel { get; set; }
-
-    #region 상태 변화시 1회 실행
-    public override void StateEnter()
+    public void ExplorEnd(E_GameState gameState)
     {
-        switch (Managers.Game.CurrentGameState)
+        if (gameState == E_GameState.Explor_End)
         {
-            case E_GameState.Explor_End:
-                ExplorEnd();
-                break;
-            case E_GameState.Battle_Start:
-                break;
-        }
-        
-    }
+            int nCount = GetSpawnCount();
 
-    public void ExplorEnd()
-    {
-        int nCount = GetSpawnCount();
+            Debug.Log("스폰 갯수 : " + nCount);
 
-        Debug.Log("스폰 갯수 : " + nCount);
+            for (int i = 0; i < nCount; i++)
+                SpawnInteractionObject();
 
-        for (int i = 0; i < nCount; i++)
-            SpawnInteractionObject();
+            Managers.Battle.CheckMonsterDetection();
 
-        CheckMonsterDetection();
-
-        if(HaveStateMonster(E_MonsterState.Battle))
-        {
-            BattleStart();         
-        }
-        else
-        {
-            UpdateObjectLifetimes();
-            Managers.Game.GameStateEnter(E_GameState.Exploring);
+            if (Managers.Game.CurrentGameState != E_GameState.Battle_Start)
+            {
+                UpdateObjectLifetimes();
+                Managers.Game.GameStateEnter(E_GameState.Exploring);
+            }
         }
     }
-
-    #endregion
 
     #region 던전 몹 생성
     public int GetSpawnCount()
@@ -89,14 +67,10 @@ public class DungeonArea : Area
                     spawnObject.Spawn();
                     spawnObject.transform.position = spawnPosition;
                     spawnObject.CurrentArea = this;
-                    spawnObject.EventOnDead += HandleOnDead;
-
-                    if (spawnObject is Creature) 
-                        (spawnObject as Creature).OnDamagedEvent += PlayerMonsterAttack;
 
                     interactionObjects.Add(spawnObject);
 
-                    Debug.Log("생성 : " + spawnObject.commandName + "확률:" + randomValue);
+                    Debug.Log("생성 : " + spawnObject.commandName);
                 }
                 return ;
             }
@@ -139,115 +113,6 @@ public class DungeonArea : Area
 
     #endregion
 
-    #region 던전 몹 감지
-    public void CheckMonsterDetection()
-    {
-        List<Creature> allMonsters = FindTypeObjects<Creature>();
-        for (int i = 0; i < allMonsters.Count; i++)
-        {
-            Creature creature = allMonsters[i];
-
-            if (creature.Detect())
-                creature.DetectAction();
-        }
-    }
-
-    public void SetHighLevelMonsterBehavior()
-    {
-        List<Creature> allMonsters = FindTypeObjects<Creature>();
-
-        for (int i = 0; i < allMonsters.Count; i++)
-        {
-            Creature creature = allMonsters[i];
-
-            if (creature.Index > FightMonsterLevel)
-            {
-                int value = UnityEngine.Random.Range(0, 4);
-
-                //0은 즉시 참여
-                if (value == 0)     //즉시 참여
-                    FightMonsterLevel = creature.Index;
-                if (value == 1)     //연속 참여
-                    creature.CurrentState = E_MonsterState.BattleWait;
-                if (value == 2)     //무관심
-                {
-                }
-                if (value == 3)     //도망
-                {
-                    creature.CurrentState = E_MonsterState.Run;
-                }
-            }
-        }
-    }
-    public void SetMidLevelMonsterBehavior()
-    {
-        List<Creature> allMonsters = FindTypeObjects<Creature>();
-
-        for (int i = 0; i < allMonsters.Count; i++)
-        {
-            Creature creature = allMonsters[i];
-
-            if (creature.Index == FightMonsterLevel)
-                creature.CurrentState = E_MonsterState.Battle;
-        }
-    }
-    public void SetLowLevelMonsterBehavior()
-    {
-        List<Creature> allMonsters = FindTypeObjects<Creature>();
-
-        for (int i = 0; i < allMonsters.Count; i++)
-        {
-            Creature creature = allMonsters[i];
-
-            if (creature.Index < FightMonsterLevel)
-                creature.CurrentState = E_MonsterState.Run;
-        }
-    }
-
-    #endregion
-
-    #region 전투 관련
-    public void PlayerMonsterAttack(int creatureLevel)
-    {
-        FightMonsterLevel = creatureLevel;
-
-        if (HaveStateMonster(E_MonsterState.Battle))
-            BattleStart();
-    }
-    public bool HaveStateMonster(E_MonsterState monsterState)
-    {
-        List<Creature> allMonsters = FindTypeObjects<Creature>();
-        for (int i = 0; i < allMonsters.Count; i++)
-        {
-            Creature creature = allMonsters[i];
-
-            if (creature.CurrentState == monsterState)
-                return true;
-        }
-        return false;
-    }
-    public void BattleStart()
-    {
-        SetHighLevelMonsterBehavior();
-        SetMidLevelMonsterBehavior();
-        SetLowLevelMonsterBehavior();
-        Managers.Game.GameStateEnter(E_GameState.Battle_Start);
-    }
-
-    protected override void HandleOnDead(InteractionObject obj)
-    {
-        base.HandleOnDead(obj);
-
-        if(HaveStateMonster(E_MonsterState.Battle))
-        {
-
-        }
-        else if (HaveStateMonster(E_MonsterState.BattleWait))
-        {
-
-        }
-    }
-    #endregion
     public void UpdateObjectLifetimes()
     {
         for (int i = 0; i < interactionObjects.Count; i++)

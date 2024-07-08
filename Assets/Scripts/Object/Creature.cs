@@ -1,15 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using static Define;
+using static UnityEngine.LightAnchor;
 
 public class Creature : InteractionObject
 {
-    public Action<int> OnDamagedEvent;
+    public Action<Creature> OnDestoryEvent;
 
-    [Header("부위 UI바")]
     protected CreaturePartUi creaturePartUi;
 
     [Header("스텟")]
@@ -27,6 +30,12 @@ public class Creature : InteractionObject
 
     [Header("속도")]
     public float speed;
+
+    [Header("공격 속도")]
+    public float attackTime;
+
+    [Header("공격력")]
+    public float damage;
     protected override bool Init()
     {
         if (base.Init() == false)
@@ -43,13 +52,12 @@ public class Creature : InteractionObject
         }
 
         creaturePartUi = GetComponentInChildren<CreaturePartUi>();
-        creaturePartUi.Init();
         return true;
     }
 
     void OnBecameInvisible() //화면밖으로 나가 보이지 않게 되면 호출이 된다.
     {
-        Destroy(gameObject); //객체를 삭제한다.
+        currentState = E_MonsterState.SucessRun;
     }
 
     public override void Spawn()
@@ -91,16 +99,33 @@ public class Creature : InteractionObject
     protected virtual void UpdateIdle()
     {
     }
-    protected virtual void UpdateBattle()
+    [SerializeField] private Image coolTimeImage;
+    [SerializeField] TextMeshProUGUI coolTimeText;
+    private float elaspedTime = 0;
+    public void UpdateBattle()
     {
+        elaspedTime += Time.deltaTime;
+        coolTimeImage.fillAmount = elaspedTime / attackTime;
+
+        if (elaspedTime >= attackTime)
+        {
+            elaspedTime = 0;
+            Managers.Player.Damaged(damage);
+        }
+
+        //디버그용
+        {
+            coolTimeText.text = (attackTime - elaspedTime).ToString("F2");
+        }
     }
+
     protected virtual void UpdateAttack()
     {
 
     }
     protected virtual void UpdateRun()
     {
-        transform.Translate(new Vector3(runPositionX * speed, runPositionY * speed));
+        transform.Translate(runDirection * speed * Time.deltaTime);
     }
     protected virtual void UpdateDead()
     {
@@ -125,24 +150,25 @@ public class Creature : InteractionObject
                     EnterWait();
                     break;
                 case E_MonsterState.Dead:
-                    EnterDead();
+                case E_MonsterState.SucessRun:
+                    DestoryObject();
                     break;
             }
         }
     }
 
-    private float runPositionX;
-    private float runPositionY;
+    private Vector2 runDirection;
     public void EnterRun()
     {
         text.color = Color.blue;
-        runPositionX = UnityEngine.Random.Range(-1f, 1f);
-        runPositionY = UnityEngine.Random.Range(-1f, 1f);
+        Vector2 centerToObject = (Vector2)transform.position - (Vector2)Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 0));
+        runDirection = centerToObject.normalized;
     }
 
     public void EnterBattle()
     {
         text.color = Color.red;
+        Managers.Game.GameStateEnter(E_GameState.Battle_Start);
     }
 
     public void EnterWait()
@@ -150,10 +176,13 @@ public class Creature : InteractionObject
         text.color = Color.red;
     }
 
-    public void EnterDead()
+    public override void DestoryObject()
     {
-        Destroy(gameObject);
+        base.DestoryObject();
+        OnDestoryEvent?.Invoke(this);
+        Managers.Object.Despawn(this);
     }
+
     #endregion
 
     #region 상태 
@@ -193,20 +222,16 @@ public class Creature : InteractionObject
     #endregion
 
     #region Battle
-    protected virtual void OnDead()
-    {
-        CurrentState = E_MonsterState.Dead;
-    }
     public void Damaged(Part part, float damage)
     {
         DamagedAction();
         //플레이어 선공
-        OnDamagedEvent?.Invoke(Index);
+        Managers.Battle.PlayerMonsterAttack(Index);
     }
     public void BrokenPart(Part part)
     {
         if (part.PartType == E_PartType.Chest || part.PartType == E_PartType.Head)
-            OnDead();
+            CurrentState = E_MonsterState.Dead;
     }
     #endregion
 

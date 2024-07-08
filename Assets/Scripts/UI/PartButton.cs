@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,13 +21,17 @@ public class PartButton : MonoBehaviour
 
         IsInteractable(true);
         Managers.Player.CanSelectEvent += IsInteractable;
-        part.Owner.EventOnDead += PartDestory;
-        button.onClick.AddListener(() => Managers.Player.SelectAttackPart(this));
+        CurrentPart.Owner.OnDestoryEvent += PartDestory;
+        button.onClick.AddListener(() => Managers.Player.SelectAttackPart(CurrentPart));
     }
 
-    protected void PartDestory(InteractionObject obj)
+    protected void PartDestory(Creature obj)
     {
         Managers.Player.CanSelectEvent -= IsInteractable;
+        CurrentPart.Owner.OnDestoryEvent -= PartDestory;
+
+        if (Managers.Player.AttackList.Contains(CurrentPart))
+            Managers.Player.AttackList.Remove(CurrentPart);
     }
 
     public void IsInteractable(bool isActive)

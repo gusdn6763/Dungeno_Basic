@@ -7,16 +7,15 @@ public class Managers : MonoBehaviour
 
     [SerializeField] private GameManager gameManager;
     [SerializeField] private ObjectManager objectManager;
+    [SerializeField] private AreaManager areaManager;
     [SerializeField] private PlayerManager playerManager;
-    [SerializeField] private UIManager uiManager;
     [SerializeField] private BattleManager battleManager;
 
     public static GameManager Game { get { return Instance?.gameManager; } }
     public static ObjectManager Object { get { return Instance?.objectManager; } }
-    public static PlayerManager Player { get { return Instance?.playerManager; } }
-    public static UIManager UI { get { return Instance?.uiManager; } }
-
+    public static AreaManager Area { get { return Instance?.areaManager; } }
     public static BattleManager Battle {get { return Instance?.battleManager; } }
+    public static PlayerManager Player { get { return Instance?.playerManager; } }
 
     private void Awake()
     {
@@ -40,6 +39,7 @@ public class Managers : MonoBehaviour
             Application.targetFrameRate = 60;
 
             Game.Init();
+            Area.Init();
             Player.Init();
         }
     }

@@ -7,8 +7,9 @@ public class CreaturePartUi : UIScript, IPointerEnterHandler, IPointerExitHandle
 {
     [SerializeField] private GameObject panelObject;
 
-    public void Init()
+    protected override void Awake()
     {
+        base.Awake();
         panelObject.SetActive(false);
     }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,9 +7,10 @@ using static Define;
 
 public class GameManager : MonoBehaviour
 {
+    public Action<E_GameState> onStateChange;
+
     [SerializeField] private Button startButton;
-    [SerializeField] private Area currentArea;
-    public Area CurrentArea { get => currentArea; set { currentArea = value; } }
+    [SerializeField] private CameraSetting cameraSetting;
 
     [Header("현재 게임 상태")]
     [SerializeField] private E_GameState currentGameState;
@@ -19,6 +21,20 @@ public class GameManager : MonoBehaviour
 
     [Header("확인용-현재시간")]
     [SerializeField] private float currentAdvantureTime = 0f;
+
+    [Header("탐험 카운트 시간 증가량")]
+    [SerializeField] private float advantureCountAddTime;
+
+    public void Init()
+    {
+        cameraSetting.Init();
+        startButton.gameObject.SetActive(true);
+    }
+
+    public void GameStart()
+    {
+        GameStateEnter(E_GameState.Explor_End);
+    }
 
     #region Update 상태 실시간 실행
     private void Update()
@@ -64,20 +80,11 @@ public class GameManager : MonoBehaviour
         if (gameState != currentGameState)
         {
             currentGameState = gameState;
-            currentArea.StateEnter();
+            onStateChange?.Invoke(currentGameState);
         }
     }
+
     #endregion
-
-    public void Init()
-    {
-        startButton.gameObject.SetActive(true);
-    }
-
-    public void GameStart()
-    {
-        GameStateEnter(E_GameState.Explor_End);
-    }
 
     #region 더블클릭
 

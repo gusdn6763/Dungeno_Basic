@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static Define;
 
@@ -27,14 +28,11 @@ public class Player : BaseObject
     [SerializeField] private float damage;
     public float Damage { get => damage; private set => damage = value; }
 
-    public void Damaged(E_PartType partType, float damage)
+    public void Damaged(float damage)
     {
-        for(int i = 0; i < parts.Count; i++)
-        {
-            if (parts[i].PartType == partType)
-            {
-                parts[i].Damaged(damage);
-            }
-        }
+        List<Part> activePart = parts.Where(p => !p.IsBroken).ToList();
+
+        int pos = Random.Range(0, activePart.Count);
+        activePart[pos].Damaged(damage);
     }
 }

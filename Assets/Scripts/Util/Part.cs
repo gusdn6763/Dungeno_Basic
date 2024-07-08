@@ -24,13 +24,13 @@ public class Part
     {
         currentHp = Mathf.Clamp(currentHp - damage, 0, FullHp);
 
+        OnDamaged?.Invoke(this, damage);
+
         if (currentHp <= 0)
         {
             IsBroken = true;
             OnBroken?.Invoke(this);
         }
-        else
-            OnDamaged?.Invoke(this, damage);
     }
 }
 
@@ -44,6 +44,7 @@ public class CreaturePart : Part
     public void Init(Creature creature)
     {
         Owner = creature;
+
         partButton.Init(this);
     }
 

@@ -17,11 +17,10 @@ public class PlayerManager : MonoBehaviour
     [Header("플레이어 턴 시간")]
     [SerializeField] private float playerTurnTime = 0;
     public float PlayerTurnTime { get => playerTurnTime; }
-    public string CurrentLocation { get; set; }
+    public Area CurrentArea { get; set; }
 
     public void Init()
     {
-        CurrentLocation = "던전";
         elaspedTime = playerTurnTime;
 
         playerUi.Init(player);
@@ -93,7 +92,9 @@ public class PlayerManager : MonoBehaviour
         PartCanSelect = false;
         canAttackCount = 0;
 
-        List<Creature> creatures = Managers.Game.CurrentArea.FindTypeObjects<Creature>();
+        //List<Creature> creatures = Managers.Battle.GetStateMonster(E_MonsterState.Battle);
+        List<Creature> creatures = Managers.Battle.allCreature;
+
         for (int i = 0; i < creatures.Count; i++)
         {
             bool getPart = false;
@@ -115,9 +116,11 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public void Damaged(E_PartType partType, float damage)
+    public void Damaged(float damage)
     {
-        player.Damaged(partType, damage);
+        player.Damaged(damage);
+        partUi.StatusUpdate();
+        StartCoroutine(ShowBloodScreen());
     }
 
     public List<Part> AttackList { get; set; } = new List<Part>();
@@ -135,14 +138,24 @@ public class PlayerManager : MonoBehaviour
         AttackList.Clear();  
     }
 
-    public void SelectAttackPart(PartButton partButton)
+    public void SelectAttackPart(Part part)
     {
         canAttackCount--;
-        AttackList.Add(partButton.CurrentPart);
+        AttackList.Add(part);
 
         if (canAttackCount == 0)
             PartCanSelect = false;
     }
 
     #endregion
+
+    [SerializeField] private Image bloodScreen;
+    IEnumerator ShowBloodScreen()
+    {
+        //BloodScreen 텍스처의 알파값을 불규칙하게 변경
+        bloodScreen.color = new Color(1, 0, 0, UnityEngine.Random.Range(0.2f, 0.3f));
+        yield return new WaitForSeconds(0.1f);
+        //BloodScreen 텍스처의 색상을 모두 0으로 변경
+        bloodScreen.color = Color.clear;
+    }
 }

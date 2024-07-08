@@ -7,7 +7,7 @@ using UnityEngine;
 public class ObjectManager : MonoBehaviour
 {
     public HashSet<Item> Items { get; } = new HashSet<Item>();
-    public HashSet<Creature> Creature { get; } = new HashSet<Creature>();
+    public HashSet<Creature> Creatures { get; } = new HashSet<Creature>();
 
     public Transform GetRootTransform(string name)
     {
@@ -24,34 +24,39 @@ public class ObjectManager : MonoBehaviour
     {
         System.Type type = typeof(T);
 
-        if (type == typeof(Item))
+        if (obj is Item item)
         {
-            InteractionObject item = Instantiate(obj);
-            item.transform.SetParent(ItemRoot);
-            Items.Add(item as Item);
-            return item as T;
+            Item spawnedItem = Instantiate(item);
+            spawnedItem.transform.SetParent(ItemRoot);
+            Items.Add(spawnedItem);
+            return spawnedItem as T;
         }
-        else if (type == typeof(Creature))
+        else if (obj is Creature creature)
         {
-            InteractionObject monster = Instantiate(obj);
-            monster.transform.SetParent(MonsterRoot);
-            Creature.Add(monster as Creature);
-            return monster as T;
+            Creature spawnedCreature = Instantiate(creature);
+            Managers.Battle.Spawn<Creature>(spawnedCreature);
+            spawnedCreature.transform.SetParent(MonsterRoot);
+            Creatures.Add(spawnedCreature);
+            return spawnedCreature as T;
         }
         return null;
     }
 
-    public void Despawn<T>(T obj) where T : BaseObject
+    public void Despawn<T>(T obj) where T : InteractionObject
     {
         System.Type type = typeof(T);
 
-        if (type == typeof(Item))
+        if (obj is Item item)
         {
-            Items.Remove(obj as Item);
+            Items.Remove(item);
         }
-        else if (type == typeof(Creature))
+        else if (obj is Creature creature)
         {
-            Creature.Remove(obj as Creature);
+            Creatures.Remove(creature);
+            Managers.Battle.Despawn(creature);
         }
+
+        obj.CurrentArea.DestoryArea(obj);
+        Destroy(obj.gameObject);
     }
 }

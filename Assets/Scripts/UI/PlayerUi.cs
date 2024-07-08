@@ -31,18 +31,13 @@ public class PlayerUi : UIScript
     {
         CurrentPlayer = player;
 
-        currentLocation.text = Managers.Player.CurrentLocation;
+        currentLocation.text = Managers.Area.GetAreaName();
         currentTime.text = TimeConverter.AddTime(0);
 
         hpSlider.Initialize(CurrentPlayer.Hp);
         hungrySlider.Initialize(CurrentPlayer.Hungry);
         fatigueSlider.Initialize(CurrentPlayer.Fatigue);
         ClearPreview();
-    }
-
-    public void MoveLocation(string location)
-    {
-        currentLocation.text = location;
     }
 
     public void ClearPreview()
@@ -95,5 +90,4 @@ public class PlayerUi : UIScript
 
         previewList.Clear();
     }
-
 }

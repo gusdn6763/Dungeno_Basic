@@ -21,6 +21,7 @@ public class Define
         Battle,
         BattleWait,
         Run,
+        SucessRun,
         Dead,
     }
 
