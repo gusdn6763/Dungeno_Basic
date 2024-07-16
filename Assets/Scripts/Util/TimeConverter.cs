@@ -5,7 +5,7 @@ public class TimeConverter
     static int hours = 6;
     static int minutes = 0;
 
-    public static string AddTime(float value)
+    public static string AddTime(int value)
     {
         // 입력된 숫자를 시간과 분으로 변환
         int additionalHours = Mathf.FloorToInt(value / 60);

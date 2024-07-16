@@ -1292,6 +1292,7 @@ GameObject:
   - component: {fileID: 5745322657738084794}
   - component: {fileID: 6587795238672238181}
   - component: {fileID: 4240860876515631135}
+  - component: {fileID: 7691665804586135291}
   m_Layer: 0
   m_Name: Orc
   m_TagString: Untagged
@@ -1317,7 +1318,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5.65, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 4.8, y: 2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &4481190841238579548
@@ -1554,12 +1555,32 @@ MonoBehaviour:
     partButton: {fileID: 8020368887167793779}
     Owner: {fileID: 0}
   detectValue: 35
-  speed: 0.1
+  detectionTime: 1
+  speed: 0.01
   attackTime: 3
   damage: 1
   coolTimeImage: {fileID: 1023116565415678840}
   coolTimeText: {fileID: 8921101719284974915}
   currentState: 0
+--- !u!114 &7691665804586135291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2031267626118891390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3657df8d2f1611d4fb3a4351eb83041b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  indicatorPrefab: {fileID: 3017041804216565210, guid: 08712dc3b9306b641bca551cd9f78c2c, type: 3}
+  sideEdge: 0.06
+  topDownEdge: 0.07
+  minScale: 0.5
+  maxScale: 1.5
+  minDistance: 5
+  maxDistance: 50
 --- !u!1 &2058345135630294258
 GameObject:
   m_ObjectHideFlags: 0

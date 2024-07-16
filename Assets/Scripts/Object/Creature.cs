@@ -2,12 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using static Define;
-using static UnityEngine.LightAnchor;
 
 public class Creature : InteractionObject
 {
@@ -28,6 +25,9 @@ public class Creature : InteractionObject
     [Header("감지 확률")]
     public float detectValue;
 
+    [Header("감지 시간")]
+    public float detectionTime = 0f;
+
     [Header("속도")]
     public float speed;
 
@@ -36,12 +36,11 @@ public class Creature : InteractionObject
 
     [Header("공격력")]
     public float damage;
+
     protected override bool Init()
     {
         if (base.Init() == false)
             return false;
-
-        ObjectType = E_ObjectType.Monster;
 
         for(int i = 0; i < parts.Count; i++)
         {
@@ -55,14 +54,9 @@ public class Creature : InteractionObject
         return true;
     }
 
-    void OnBecameInvisible() //화면밖으로 나가 보이지 않게 되면 호출이 된다.
-    {
-        currentState = E_MonsterState.SucessRun;
-    }
-
     public override void Spawn()
     {
-        currentState = E_MonsterState.Idle;
+        SetState(E_MonsterState.Idle);
         StartCoroutine(StateUpdate());
     }
 
@@ -92,7 +86,7 @@ public class Creature : InteractionObject
                     break;
             }
 
-            yield return new WaitForSeconds(0.1f);
+            yield return null;
         }
     }
 
@@ -125,7 +119,7 @@ public class Creature : InteractionObject
     }
     protected virtual void UpdateRun()
     {
-        transform.Translate(runDirection * speed * Time.deltaTime);
+        transform.Translate(runDirection * speed);
     }
     protected virtual void UpdateDead()
     {
@@ -133,11 +127,13 @@ public class Creature : InteractionObject
     }
     #endregion
 
-    #region 상태 최초 실행
-    public void StateEnter(E_MonsterState monsterState)
+    #region 상태 실행
+    public void SetState(E_MonsterState monsterState)
     {
         if (currentState != monsterState)
         {
+            currentState = monsterState;
+
             switch (monsterState)
             {
                 case E_MonsterState.Run:
@@ -168,12 +164,14 @@ public class Creature : InteractionObject
     public void EnterBattle()
     {
         text.color = Color.red;
-        Managers.Game.GameStateEnter(E_GameState.Battle_Start);
+
+        Managers.Battle.BattleStart();
+        Managers.Game.GameStateEnter(E_AreaState.Battle_Start);
     }
 
     public void EnterWait()
     {
-        text.color = Color.red;
+        text.color = Color.yellow;
     }
 
     public override void DestoryObject()
@@ -188,19 +186,7 @@ public class Creature : InteractionObject
     #region 상태 
     [Header("확인용-현재상태")]
     [SerializeField] protected E_MonsterState currentState = E_MonsterState.None;
-
-    public E_MonsterState CurrentState
-    {
-        get
-        {
-            return currentState;
-        }
-        set
-        {
-            StateEnter(value);
-            currentState = value;
-        }
-    }
+    public E_MonsterState CurrentState { get => currentState; }
 
     public bool Detect()
     {
@@ -210,14 +196,21 @@ public class Creature : InteractionObject
             return false;
     }
 
-    public virtual void DetectAction()
+    public void DetectAction()
     {
-        CurrentState = E_MonsterState.Battle;
+        if (CurrentState == E_MonsterState.Idle)
+            StartCoroutine(DetectionCoroutine());
+    }
+
+    public virtual IEnumerator DetectionCoroutine()
+    {
+        yield return new WaitForSeconds(detectionTime);
+        SetState(E_MonsterState.Battle);
     }
 
     public virtual void DamagedAction()
     {
-        CurrentState = E_MonsterState.Battle;
+        SetState(E_MonsterState.Battle);
     }
     #endregion
 
@@ -225,13 +218,11 @@ public class Creature : InteractionObject
     public void Damaged(Part part, float damage)
     {
         DamagedAction();
-        //플레이어 선공
-        Managers.Battle.PlayerMonsterAttack(Index);
     }
     public void BrokenPart(Part part)
     {
         if (part.PartType == E_PartType.Chest || part.PartType == E_PartType.Head)
-            CurrentState = E_MonsterState.Dead;
+            SetState(E_MonsterState.Dead);
     }
     #endregion
 

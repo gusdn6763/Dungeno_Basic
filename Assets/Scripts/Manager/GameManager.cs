@@ -7,14 +7,14 @@ using static Define;
 
 public class GameManager : MonoBehaviour
 {
-    public Action<E_GameState> onStateChange;
+    public Action<E_AreaState> onStateChange;
 
     [SerializeField] private Button startButton;
     [SerializeField] private CameraSetting cameraSetting;
 
     [Header("현재 게임 상태")]
-    [SerializeField] private E_GameState currentGameState;
-    public E_GameState CurrentGameState { get => currentGameState; }
+    [SerializeField] private E_AreaState currentGameState;
+    public E_AreaState CurrentGameState { get => currentGameState; }
 
     [Header("탐험 카운트 시간")]
     [SerializeField] private float advantureCountTime;
@@ -23,17 +23,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float currentAdvantureTime = 0f;
 
     [Header("탐험 카운트 시간 증가량")]
-    [SerializeField] private float advantureCountAddTime;
+    [SerializeField] private int advantureCountAddTime;
 
+    private Camera mainCamera;
+    public Camera MainCamera { get => mainCamera; }
     public void Init()
     {
-        cameraSetting.Init();
+        mainCamera = Camera.main;
+        cameraSetting.Init(mainCamera);
         startButton.gameObject.SetActive(true);
     }
 
     public void GameStart()
     {
-        GameStateEnter(E_GameState.Explor_End);
+        GameStateEnter(E_AreaState.Explor_End);
     }
 
     #region Update 상태 실시간 실행
@@ -50,7 +53,7 @@ public class GameManager : MonoBehaviour
     {
         switch (currentGameState)
         {
-            case E_GameState.Exploring:
+            case E_AreaState.Exploring:
                 ProcessExplorationTime();
                 break;
         }
@@ -68,15 +71,17 @@ public class GameManager : MonoBehaviour
         if (currentAdvantureTime >= advantureCountTime)
         {
             currentAdvantureTime = 0;
-            GameStateEnter(E_GameState.Explor_End);
+            Managers.Player.AddTime(advantureCountAddTime);
+            GameStateEnter(E_AreaState.Explor_End);
         }
     }
 
     #endregion
 
     #region 상태 변화시 1회 실행
-    public void GameStateEnter(E_GameState gameState)
+    public void GameStateEnter(E_AreaState gameState)
     {
+        currentAdvantureTime = 0;
         if (gameState != currentGameState)
         {
             currentGameState = gameState;
@@ -96,10 +101,10 @@ public class GameManager : MonoBehaviour
     {
         if (CheckDoubleClick() || Input.GetKeyDown(KeyCode.Space))
         {
-            if (currentGameState == E_GameState.Exploring)
-                GameStateEnter(E_GameState.Explore_Stop);
-            else if (currentGameState == E_GameState.Explore_Stop)
-                GameStateEnter(E_GameState.Exploring);
+            if (currentGameState == E_AreaState.Exploring)
+                GameStateEnter(E_AreaState.Explore_Stop);
+            else if (currentGameState == E_AreaState.Explore_Stop)
+                GameStateEnter(E_AreaState.Exploring);
         }
     }
 

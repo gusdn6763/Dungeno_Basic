@@ -12,9 +12,9 @@ public class DungeonArea : Area
     [Header("오브젝트 스폰 확률")]
     public SerializableDictionary<InteractionObject, float> InteractionObjDic;
 
-    public void ExplorEnd(E_GameState gameState)
+    public void ExplorEnd(E_AreaState gameState)
     {
-        if (gameState == E_GameState.Explor_End)
+        if (gameState == E_AreaState.Explor_End)
         {
             int nCount = GetSpawnCount();
 
@@ -25,10 +25,10 @@ public class DungeonArea : Area
 
             Managers.Battle.CheckMonsterDetection();
 
-            if (Managers.Game.CurrentGameState != E_GameState.Battle_Start)
+            if (Managers.Game.CurrentGameState != E_AreaState.Battle_Start)
             {
                 UpdateObjectLifetimes();
-                Managers.Game.GameStateEnter(E_GameState.Exploring);
+                Managers.Game.GameStateEnter(E_AreaState.Exploring);
             }
         }
     }

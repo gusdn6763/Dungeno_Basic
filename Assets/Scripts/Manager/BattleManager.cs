@@ -6,7 +6,7 @@ public class BattleManager : MonoBehaviour
 {
     public List<Creature> allCreature = new List<Creature>();
     public int FightMonsterLevel { get; set; }
-
+    public DungeonArea area;
     public void Spawn<T>(T obj) where T : Creature
     {
         allCreature.Add(obj);
@@ -24,13 +24,11 @@ public class BattleManager : MonoBehaviour
         {
             List<Creature> waitCreatures = GetStateMonster(E_MonsterState.BattleWait);
             foreach (var creature in waitCreatures)
-            {
-                creature.CurrentState = E_MonsterState.Battle;
-            }
+                creature.SetState(E_MonsterState.Battle);
         }
         else
         {
-            Managers.Game.GameStateEnter(E_GameState.Exploring);
+            Managers.Game.GameStateEnter(E_AreaState.Exploring);
         }
     }
 
@@ -53,22 +51,29 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void PlayerMonsterAttack(int creatureLevel)
-    {
-        FightMonsterLevel = creatureLevel;
-
-        if (HaveStateMonster(E_MonsterState.Battle))
-            BattleStart();
-    }
-
     public void BattleStart()
     {
-        SetHighLevelMonsterBehavior();
-        SetMidLevelMonsterBehavior();
-        SetLowLevelMonsterBehavior();
-        Managers.Game.GameStateEnter(E_GameState.Battle_Start);
+        if (HaveStateMonster(E_MonsterState.Battle))
+        {
+            FightMonsterLevel = CurrentMaxLevel();
+
+            SetHighLevelMonsterBehavior();
+            SetMidLevelMonsterBehavior();
+            SetLowLevelMonsterBehavior();
+            Managers.Game.GameStateEnter(E_AreaState.Battle_Start);
+        }
     }
 
+    public int CurrentMaxLevel()
+    {
+        int idx = 0;
+        for (int i = 0; i < allCreature.Count; i++)
+        {
+            if (allCreature[i].CurrentState == E_MonsterState.Battle)
+                idx = Mathf.Max(idx, allCreature[i].Index);
+        }
+        return idx;
+    }
     public void SetHighLevelMonsterBehavior()
     {
         foreach (var creature in allCreature)
@@ -82,33 +87,31 @@ public class BattleManager : MonoBehaviour
                         FightMonsterLevel = creature.Index;
                         break;
                     case 1: // 연속 참여
-                        creature.CurrentState = E_MonsterState.BattleWait;
+                        creature.SetState(E_MonsterState.BattleWait);
                         break;
                     case 2: // 무관심
                         break;
                     case 3: // 도망
-                        creature.CurrentState = E_MonsterState.Run;
+                        creature.SetState(E_MonsterState.Run);
                         break;
                 }
             }
         }
     }
-
     public void SetMidLevelMonsterBehavior()
     {
         foreach (var creature in allCreature)
         {
             if (creature.Index == FightMonsterLevel)
-                creature.CurrentState = E_MonsterState.Battle;
+                creature.SetState(E_MonsterState.Battle);
         }
     }
-
     public void SetLowLevelMonsterBehavior()
     {
         foreach (var creature in allCreature)
         {
-            if (creature.Index < FightMonsterLevel)
-                creature.CurrentState = E_MonsterState.Run;
+            if (creature.Index < FightMonsterLevel && creature.CurrentState == E_MonsterState.Idle)
+                creature.SetState(E_MonsterState.Run);
         }
     }
 }

@@ -43,7 +43,7 @@ public class PlayerManager : MonoBehaviour
         if (elaspedTime >= PlayerTurnTime)
         {
             //공격 가능에도 놓침
-            if (Managers.Game.CurrentGameState == E_GameState.Battle_Start)
+            if (Managers.Game.CurrentGameState == E_AreaState.Battle_Start)
             {
                 PlayerAttack();
             }
@@ -157,5 +157,10 @@ public class PlayerManager : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         //BloodScreen 텍스처의 색상을 모두 0으로 변경
         bloodScreen.color = Color.clear;
+    }
+
+    public void AddTime(int time)
+    {
+        playerUi.AddTime(time);
     }
 }

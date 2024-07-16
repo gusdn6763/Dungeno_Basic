@@ -32,10 +32,10 @@ public class Define
         Item,
     }
 
-    public enum E_GameState
+    public enum E_AreaState
     {
         None,
-        Exploring,
+        Exploring,  //≈Ω«Ë¡ﬂ
         Explor_End,
         Explore_Stop,
         Battle_Start,

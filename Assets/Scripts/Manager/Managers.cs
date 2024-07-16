@@ -10,12 +10,15 @@ public class Managers : MonoBehaviour
     [SerializeField] private AreaManager areaManager;
     [SerializeField] private PlayerManager playerManager;
     [SerializeField] private BattleManager battleManager;
+    [SerializeField] private UIManager uiManager;
+    [SerializeField] private InputManager inputManager;
 
     public static GameManager Game { get { return Instance?.gameManager; } }
     public static ObjectManager Object { get { return Instance?.objectManager; } }
     public static AreaManager Area { get { return Instance?.areaManager; } }
     public static BattleManager Battle {get { return Instance?.battleManager; } }
     public static PlayerManager Player { get { return Instance?.playerManager; } }
+    public static UIManager UI { get { return Instance?.uiManager; } }
 
     private void Awake()
     {

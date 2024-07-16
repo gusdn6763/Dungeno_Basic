@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5694968127154347128}
   - component: {fileID: 6048128423201531907}
   - component: {fileID: -8040037697120779265}
+  - component: {fileID: 5960613376548011530}
   m_Layer: 0
   m_Name: Herb
   m_TagString: Untagged
@@ -235,3 +236,22 @@ MonoBehaviour:
   currentLifetime: 0
   commandName: "\uD5C8\uBE0C"
   description: "\uD5C8\uBE0C\uC774\uB2E4."
+--- !u!114 &5960613376548011530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5224760955877734077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3657df8d2f1611d4fb3a4351eb83041b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  indicatorPrefab: {fileID: 3017041804216565210, guid: 08712dc3b9306b641bca551cd9f78c2c, type: 3}
+  sideEdge: 0.06
+  topDownEdge: 0.07
+  minScale: 0.5
+  maxScale: 1.5
+  minDistance: 5
+  maxDistance: 50

@@ -21,7 +21,6 @@ public class InteractionObject : BaseObject
     [Header("Ό³Έν")]
     public string description;
 
-    public E_ObjectType ObjectType { get; protected set; }
     public Area CurrentArea { get; set; }
 
     protected TextMeshPro text;

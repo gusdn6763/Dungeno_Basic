@@ -90,4 +90,9 @@ public class PlayerUi : UIScript
 
         previewList.Clear();
     }
+
+    public void AddTime(int Time)
+    {
+        currentTime.text = TimeConverter.AddTime(Time);
+    }
 }
