@@ -12,24 +12,23 @@ public class CameraSetting : MonoBehaviour
     [SerializeField] private float edgeScrollThreshold = 10f;
 
     private Camera mainCamera;
+    private Creature currentCreature;
     private Vector2 mapSize;
     private Vector2 combatMovableBounds;
 
+    #region 세팅
     public void Init(Camera camera)
     {
         mainCamera = camera;
-        Managers.Game.onStateChange += OnGameStateChange;
         CalculateMapSize();
         CalculateMovableBounds();
     }
-
     private void CalculateMapSize()
     {
         float height = 2f * mainCamera.orthographicSize;
         float width = height * mainCamera.aspect;
         mapSize = new Vector2(width, height);
     }
-
     private void CalculateMovableBounds()
     {
         float verticalSize = combatOrthographicSize;
@@ -40,14 +39,14 @@ public class CameraSetting : MonoBehaviour
 
         combatMovableBounds = new Vector2(horizontalMovableRange, verticalMovableRange);
     }
+    #endregion
 
     private void Update()
     {
         //근사값 비교
-        if (Mathf.Approximately(mainCamera.orthographicSize, combatOrthographicSize))
+        if (Mathf.Approximately(mainCamera.orthographicSize, combatOrthographicSize) && zoomCoroutine == null)
             MoveCamera();
     }
-
     private void MoveCamera()
     {
         Vector3 movement = Vector3.zero;
@@ -75,31 +74,88 @@ public class CameraSetting : MonoBehaviour
         mainCamera.transform.position = newPosition;
     }
 
+    public bool CheckOutArea(Vector3 position)
+    {
+        if (position.x < -mapSize.x / 2 || position.x > mapSize.x / 2 ||
+            position.y < -mapSize.y / 2 || position.y > mapSize.y / 2)
+        {
+            return true;
+        }
+        return false;
+    }
+
     Coroutine zoomCoroutine;
-    private void OnGameStateChange(E_AreaState newState)
+    public void CameraZoomOn(Vector3 targetPosition)
     {
         if (zoomCoroutine != null)
             StopCoroutine(zoomCoroutine);
 
-        if (newState == E_AreaState.Battle_Start)
-            zoomCoroutine = StartCoroutine(CameraZoom(combatOrthographicSize, zoomChangeDuration));
-        else
-            zoomCoroutine = StartCoroutine(CameraZoom(normalOrthographicSize, zoomChangeDuration));
+        zoomCoroutine = StartCoroutine(CameraZoomOn(combatOrthographicSize, targetPosition));
+    }
+    public void CameraZoomOff()
+    {
+        if (zoomCoroutine != null)
+            StopCoroutine(zoomCoroutine);
+
+        zoomCoroutine = StartCoroutine(CameraZoomOff(normalOrthographicSize));
     }
 
-    private IEnumerator CameraZoom(float targetOrthographicSize, float duration)
+    private IEnumerator CameraZoomOn(float targetOrthographicSize, Vector3 targetPosition)
     {
         float startOrthographicSize = mainCamera.orthographicSize;
+        Vector3 startPosition = mainCamera.transform.position;
+
         float elapsedTime = 0f;
 
-        while (elapsedTime < duration)
+        while (elapsedTime < zoomChangeDuration)
         {
-            mainCamera.orthographicSize = Mathf.Lerp(startOrthographicSize, targetOrthographicSize, elapsedTime / duration);
+            // 카메라 크기 조정
+            mainCamera.orthographicSize = Mathf.Lerp(startOrthographicSize, targetOrthographicSize, elapsedTime / zoomChangeDuration);
+
+            // 새로운 카메라 위치 계산
+            Vector3 newPosition = Vector3.Lerp(startPosition, targetPosition, elapsedTime / zoomChangeDuration);
+
+            // 카메라 위치를 맵 경계 내로 제한
+            float halfHeight = mainCamera.orthographicSize;
+            float halfWidth = halfHeight * mainCamera.aspect;
+
+            newPosition.x = Mathf.Clamp(newPosition.x, -mapSize.x / 2 + halfWidth, mapSize.x / 2 - halfWidth);
+            newPosition.y = Mathf.Clamp(newPosition.y, -mapSize.y / 2 + halfHeight, mapSize.y / 2 - halfHeight);
+            newPosition.z = -10; // 카메라의 z 위치 유지
+
+            mainCamera.transform.position = newPosition;
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // 최종 위치 및 크기 설정
+        mainCamera.orthographicSize = targetOrthographicSize;
+        Vector3 finalPosition = targetPosition;
+        finalPosition.x = Mathf.Clamp(finalPosition.x, -mapSize.x / 2 + mainCamera.orthographicSize * mainCamera.aspect, mapSize.x / 2 - mainCamera.orthographicSize * mainCamera.aspect);
+        finalPosition.y = Mathf.Clamp(finalPosition.y, -mapSize.y / 2 + mainCamera.orthographicSize, mapSize.y / 2 - mainCamera.orthographicSize);
+        finalPosition.z = -10;
+        mainCamera.transform.position = finalPosition;
+        zoomCoroutine = null;
+    }
+
+    private IEnumerator CameraZoomOff(float targetOrthographicSize)
+    {
+        float startOrthographicSize = mainCamera.orthographicSize;
+        Vector3 startPosition = mainCamera.transform.position;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < zoomChangeDuration)
+        {
+            mainCamera.orthographicSize = Mathf.Lerp(startOrthographicSize, targetOrthographicSize, elapsedTime / zoomChangeDuration);
+
+            mainCamera.transform.position = Vector3.Lerp(startPosition, new Vector3(0, 0, -10), elapsedTime / zoomChangeDuration);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
         mainCamera.orthographicSize = targetOrthographicSize;
+        zoomCoroutine = null;
     }
 
     #region 기즈모

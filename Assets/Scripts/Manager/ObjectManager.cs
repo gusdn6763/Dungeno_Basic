@@ -1,13 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
+using static Define;
 
 public class ObjectManager : MonoBehaviour
 {
-    public HashSet<Item> Items { get; } = new HashSet<Item>();
-    public HashSet<Creature> Creatures { get; } = new HashSet<Creature>();
+    public List<Item> Items { get; } = new List<Item>();
+    public List<Creature> Creatures { get; } = new List<Creature>();
 
     public Transform GetRootTransform(string name)
     {
@@ -34,7 +32,6 @@ public class ObjectManager : MonoBehaviour
         else if (obj is Creature creature)
         {
             Creature spawnedCreature = Instantiate(creature);
-            Managers.Battle.Spawn<Creature>(spawnedCreature);
             spawnedCreature.transform.SetParent(MonsterRoot);
             Creatures.Add(spawnedCreature);
             return spawnedCreature as T;
@@ -53,10 +50,8 @@ public class ObjectManager : MonoBehaviour
         else if (obj is Creature creature)
         {
             Creatures.Remove(creature);
-            Managers.Battle.Despawn(creature);
         }
-
-        obj.CurrentArea.DestoryArea(obj);
-        Destroy(obj.gameObject);
+        if(obj)
+            Destroy(obj.gameObject);
     }
 }

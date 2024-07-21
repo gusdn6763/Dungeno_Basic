@@ -1555,13 +1555,13 @@ MonoBehaviour:
     partButton: {fileID: 8020368887167793779}
     Owner: {fileID: 0}
   detectValue: 35
-  detectionTime: 1
+  detectionTime: 0.1
   speed: 0.01
   attackTime: 3
   damage: 1
+  currentState: 0
   coolTimeImage: {fileID: 1023116565415678840}
   coolTimeText: {fileID: 8921101719284974915}
-  currentState: 0
 --- !u!114 &7691665804586135291
 MonoBehaviour:
   m_ObjectHideFlags: 0

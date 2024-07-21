@@ -5,11 +5,8 @@ public static class Utils
 {
     private static void CalculateCameraExtents(float zPosition, out float halfWidth, out float halfHeight)
     {
-        float distance = Mathf.Abs(zPosition - Camera.main.transform.position.z);
-        float halfFOV = Camera.main.fieldOfView * 0.5f;
-        float aspect = Camera.main.aspect;
-        halfHeight = distance * Mathf.Tan(halfFOV * Mathf.Deg2Rad);
-        halfWidth = halfHeight * aspect;
+        halfHeight = Camera.main.orthographicSize;
+        halfWidth = halfHeight * Camera.main.aspect;
     }
     public static Vector3 GetBottomLeftPosition(float zPosition)
     {

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Define;
 
 public class Area : MonoBehaviour
 {
@@ -10,10 +11,9 @@ public class Area : MonoBehaviour
     [SerializeField] private string areaName;
     public string AreaName { get => areaName; }
 
-    public void DestoryArea(InteractionObject obj)
+    public virtual void Init()
     {
-        if(interactionObjects.Contains(obj))
-            interactionObjects.Remove(obj);     
+
     }
 
     public List<T> FindTypeObjects<T>() where T : InteractionObject
@@ -27,5 +27,15 @@ public class Area : MonoBehaviour
             }
         }
         return list;
+    }
+
+    public virtual void DestoryArea(InteractionObject obj)
+    {
+        if(interactionObjects.Contains(obj))
+            interactionObjects.Remove(obj);     
+    }
+
+    public virtual void AreaStateEnter(E_AreaState areaState)
+    {
     }
 }

@@ -20,14 +20,12 @@ public class PartButton : MonoBehaviour
         slider = GetComponentInChildren<Slider>();
 
         IsInteractable(true);
-        Managers.Player.CanSelectEvent += IsInteractable;
         CurrentPart.Owner.OnDestoryEvent += PartDestory;
         button.onClick.AddListener(() => Managers.Player.SelectAttackPart(CurrentPart));
     }
 
     protected void PartDestory(Creature obj)
     {
-        Managers.Player.CanSelectEvent -= IsInteractable;
         CurrentPart.Owner.OnDestoryEvent -= PartDestory;
 
         if (Managers.Player.AttackList.Contains(CurrentPart))
@@ -37,7 +35,7 @@ public class PartButton : MonoBehaviour
     public void IsInteractable(bool isActive)
     {
         //부위가 파괴되었거나 선택하지 않았을 경우
-        if (CurrentPart.IsBroken || Managers.Player.PartCanSelect == false)
+        if (CurrentPart.IsBroken)
             button.interactable = false;
         else
             button.interactable = isActive;

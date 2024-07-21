@@ -780,7 +780,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: 1
-  maxLifetime: 3
+  maxLifetime: 5
   currentLifetime: 0
   commandName: "\uD1A0\uB07C"
   description: "\uD1A0\uB07C\uC774\uB2E4."
@@ -801,14 +801,14 @@ MonoBehaviour:
     currentHp: 10
     partButton: {fileID: 5151185868525719807}
     Owner: {fileID: 0}
-  detectValue: 35
-  detectionTime: 1
+  detectValue: 5
+  detectionTime: 0.1
   speed: 0.01
   attackTime: 0
   damage: 0
+  currentState: 0
   coolTimeImage: {fileID: 9200731105790235307}
   coolTimeText: {fileID: 8320638932634335214}
-  currentState: 0
 --- !u!114 &4750231320780252227
 MonoBehaviour:
   m_ObjectHideFlags: 0

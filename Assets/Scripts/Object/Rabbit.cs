@@ -5,13 +5,12 @@ using static Define;
 
 public class Rabbit : Creature
 {
-    public override IEnumerator DetectionCoroutine()
+    public override void DamagedAction()
     {
-        yield return new WaitForSeconds(detectionTime);
         SetState(E_MonsterState.Run);
     }
 
-    public override void DamagedAction()
+    public override void NoticeAction()
     {
         SetState(E_MonsterState.Run);
     }

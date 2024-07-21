@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   index: 2
-  maxLifetime: 3
+  maxLifetime: 4
   currentLifetime: 0
   commandName: "\uB291\uB300"
   description: "\uB291\uB300\uC774\uB2E4."
@@ -401,13 +401,13 @@ MonoBehaviour:
     partButton: {fileID: 532858175761090206}
     Owner: {fileID: 0}
   detectValue: 35
-  detectionTime: 1
+  detectionTime: 0.1
   speed: 0.01
   attackTime: 3
   damage: 1
+  currentState: 0
   coolTimeImage: {fileID: 1945321683720997445}
   coolTimeText: {fileID: 2691507924562615748}
-  currentState: 0
 --- !u!114 &8533444994777277355
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,29 +1,10 @@
-using System;
-using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static Define;
 
 public class GameManager : MonoBehaviour
 {
-    public Action<E_AreaState> onStateChange;
-
     [SerializeField] private Button startButton;
     [SerializeField] private CameraSetting cameraSetting;
-
-    [Header("현재 게임 상태")]
-    [SerializeField] private E_AreaState currentGameState;
-    public E_AreaState CurrentGameState { get => currentGameState; }
-
-    [Header("탐험 카운트 시간")]
-    [SerializeField] private float advantureCountTime;
-
-    [Header("확인용-현재시간")]
-    [SerializeField] private float currentAdvantureTime = 0f;
-
-    [Header("탐험 카운트 시간 증가량")]
-    [SerializeField] private int advantureCountAddTime;
 
     private Camera mainCamera;
     public Camera MainCamera { get => mainCamera; }
@@ -34,101 +15,18 @@ public class GameManager : MonoBehaviour
         startButton.gameObject.SetActive(true);
     }
 
-    public void GameStart()
+    public void CameraZoomOn(Vector3 targetPosition)
     {
-        GameStateEnter(E_AreaState.Explor_End);
+        cameraSetting.CameraZoomOn(targetPosition);
     }
 
-    #region Update 상태 실시간 실행
-    private void Update()
+    public void CameraZoomOff()
     {
-        //더블클릭 또는 스페이스바시 시작 상태를 변경
-        HandleInput();
-
-        //게임 상태별 진행
-        GameStateUpdate();
+        cameraSetting.CameraZoomOff();
     }
 
-    public void GameStateUpdate()
+    public bool CheckOutArea(Vector3 pos)
     {
-        switch (currentGameState)
-        {
-            case E_AreaState.Exploring:
-                ProcessExplorationTime();
-                break;
-        }
+        return cameraSetting.CheckOutArea(pos);
     }
-    [SerializeField] TextMeshProUGUI text;
-    public void ProcessExplorationTime()
-    {
-        //디버그용
-        {
-            text.text = (advantureCountTime - currentAdvantureTime).ToString("F2");
-        }
-
-        currentAdvantureTime += Time.deltaTime;
-
-        if (currentAdvantureTime >= advantureCountTime)
-        {
-            currentAdvantureTime = 0;
-            Managers.Player.AddTime(advantureCountAddTime);
-            GameStateEnter(E_AreaState.Explor_End);
-        }
-    }
-
-    #endregion
-
-    #region 상태 변화시 1회 실행
-    public void GameStateEnter(E_AreaState gameState)
-    {
-        currentAdvantureTime = 0;
-        if (gameState != currentGameState)
-        {
-            currentGameState = gameState;
-            onStateChange?.Invoke(currentGameState);
-        }
-    }
-
-    #endregion
-
-    #region 더블클릭
-
-    [Header("더블클릭 제한시간")]
-    public float m_DoubleClickSecond = 0.25f;
-    private bool m_IsOneClick = false;
-    private double m_Timer = 0;
-    private void HandleInput()
-    {
-        if (CheckDoubleClick() || Input.GetKeyDown(KeyCode.Space))
-        {
-            if (currentGameState == E_AreaState.Exploring)
-                GameStateEnter(E_AreaState.Explore_Stop);
-            else if (currentGameState == E_AreaState.Explore_Stop)
-                GameStateEnter(E_AreaState.Exploring);
-        }
-    }
-
-    public bool CheckDoubleClick()
-    {
-        if (m_IsOneClick && ((Time.time - m_Timer) > m_DoubleClickSecond))
-        {
-            m_IsOneClick = false;
-        }
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (!m_IsOneClick)
-            {
-                m_Timer = Time.time;
-                m_IsOneClick = true;
-            }
-            else if (m_IsOneClick && ((Time.time - m_Timer) < m_DoubleClickSecond))
-            {
-                m_IsOneClick = false;
-                return true;
-            }
-        }
-        return false;
-    }
-    #endregion
 }

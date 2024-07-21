@@ -7,16 +7,20 @@ public class CreaturePartUi : UIScript, IPointerEnterHandler, IPointerExitHandle
 {
     [SerializeField] private GameObject panelObject;
 
+    public Creature Owner { get; set; } = null;
+
     protected override void Awake()
     {
         base.Awake();
         panelObject.SetActive(false);
+        Owner = GetComponentInParent<Creature>();
     }
 
     public override void OpenClose(bool on)
     {
-        canvasGroup.alpha = on ? 1 : 0;
-        canvasGroup.blocksRaycasts = on ? true : false;
+        if (on == false)
+            Debug.Log("");
+        panelObject.SetActive(on);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

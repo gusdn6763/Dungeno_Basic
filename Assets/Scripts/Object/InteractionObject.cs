@@ -13,13 +13,20 @@ public class InteractionObject : BaseObject
     public int maxLifetime;
 
     [Header("확인용-현재 생존 시간")]
-    public int currentLifetime;
+    [SerializeField] int currentLifetime;
+    public int CurrentLifetime { get => currentLifetime; set => currentLifetime = value; }
 
     [Header("이름")]
     public string commandName;
 
     [Header("설명")]
     public string description;
+
+    [Header("감지 확률")]
+    public float detectValue;
+
+    [Header("감지 시간")]
+    public float detectionTime = 0f;
 
     public Area CurrentArea { get; set; }
 
@@ -56,18 +63,26 @@ public class InteractionObject : BaseObject
 
     }
 
-    public void UpdateLifetime()
+    public virtual bool Detect()
+    {
+        return UnityEngine.Random.value <= detectValue / 100f;
+    }
+
+    public virtual void DetectAction()
+    {
+    }
+
+    public void UpdateLifeTime()
     {
         currentLifetime++;
+
         if (currentLifetime >= maxLifetime)
-        {
-            Debug.Log(commandName + "삭제");
             DestoryObject();
-        }
     }
 
     public virtual void DestoryObject()
     {
+        CurrentArea.DestoryArea(this);
         Managers.Object.Despawn(this);
     }
 }

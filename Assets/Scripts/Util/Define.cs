@@ -18,10 +18,10 @@ public class Define
     {
         None,
         Idle,
+        Notice,
         Battle,
         BattleWait,
         Run,
-        SucessRun,
         Dead,
     }
 
@@ -35,9 +35,9 @@ public class Define
     public enum E_AreaState
     {
         None,
-        Exploring,  //≈Ω«Ë¡ﬂ
-        Explor_End,
-        Explore_Stop,
+        Exploring,      //≈Ω«Ë¡ﬂ
+        Explore_Stop,   //≈Ω«Ë∏ÿ√„
+        Explore_End,    //≈Ω«Ëøœ∑·
         Battle_Start,
         Battle_End
     }

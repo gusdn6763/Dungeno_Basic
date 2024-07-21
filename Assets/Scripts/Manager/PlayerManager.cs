@@ -43,7 +43,7 @@ public class PlayerManager : MonoBehaviour
         if (elaspedTime >= PlayerTurnTime)
         {
             //공격 가능에도 놓침
-            if (Managers.Game.CurrentGameState == E_AreaState.Battle_Start)
+            if (Managers.Area.AreaState == E_AreaState.Battle_Start)
             {
                 PlayerAttack();
             }
@@ -66,39 +66,26 @@ public class PlayerManager : MonoBehaviour
 
     #region 플레이어 공격
 
-    public Action<bool> CanSelectEvent;     //몬스터 부위 공격 가능 여부
-
     private int canAttackCount = 0;
-    private bool partCanSelect = false;
-    public bool PartCanSelect
-    {
-        get => partCanSelect; 
-        private set
-        {
-            partCanSelect = value;
-            CanSelectEvent?.Invoke(partCanSelect);
-        }    //공격 타입 선택 여부
-    }
+
     public void SelectAttackCount(int number)
     {
         AttackList.Clear();
-        PartCanSelect = true;
         canAttackCount = number;
     }
 
     public void SelectFireWallAttack()
     {
         AttackList.Clear();
-        PartCanSelect = false;
         canAttackCount = 0;
 
-        //List<Creature> creatures = Managers.Battle.GetStateMonster(E_MonsterState.Battle);
-        List<Creature> creatures = Managers.Battle.allCreature;
+        List<Creature> creatures = Managers.Area.GetStateCreature(E_MonsterState.Battle);
 
         for (int i = 0; i < creatures.Count; i++)
         {
             bool getPart = false;
             Creature creature = creatures[i];
+
             if (creature.HavePart(E_PartType.LeftLeg))
             {
                 AttackList.Add(creature.GetPart(E_PartType.LeftLeg));
@@ -127,7 +114,6 @@ public class PlayerManager : MonoBehaviour
     public void PlayerAttack()
     {
         elaspedTime = 0;
-        PartCanSelect = false;
 
         for (int i = 0; i < AttackList.Count; i++)
         {
@@ -142,9 +128,6 @@ public class PlayerManager : MonoBehaviour
     {
         canAttackCount--;
         AttackList.Add(part);
-
-        if (canAttackCount == 0)
-            PartCanSelect = false;
     }
 
     #endregion

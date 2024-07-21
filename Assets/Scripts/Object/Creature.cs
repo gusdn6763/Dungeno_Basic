@@ -10,8 +10,6 @@ public class Creature : InteractionObject
 {
     public Action<Creature> OnDestoryEvent;
 
-    protected CreaturePartUi creaturePartUi;
-
     [Header("스텟")]
     [SerializeField] private Stat stat;
 
@@ -21,12 +19,6 @@ public class Creature : InteractionObject
 
     [Header("부위")]
     public List<CreaturePart> parts = new List<CreaturePart>();
-
-    [Header("감지 확률")]
-    public float detectValue;
-
-    [Header("감지 시간")]
-    public float detectionTime = 0f;
 
     [Header("속도")]
     public float speed;
@@ -50,10 +42,9 @@ public class Creature : InteractionObject
             creaturePart.OnBroken += BrokenPart;
         }
 
-        creaturePartUi = GetComponentInChildren<CreaturePartUi>();
+        partUi = GetComponentInChildren<CreaturePartUi>();
         return true;
     }
-
     public override void Spawn()
     {
         SetState(E_MonsterState.Idle);
@@ -61,6 +52,9 @@ public class Creature : InteractionObject
     }
 
     #region AI
+    [Header("확인용-현재상태")]
+    [SerializeField] protected E_MonsterState currentState = E_MonsterState.None;
+    public E_MonsterState CurrentState { get => currentState; }
 
     #region 실시간
     protected virtual IEnumerator StateUpdate()
@@ -69,20 +63,14 @@ public class Creature : InteractionObject
         {
             switch (currentState)
             {
-                case E_MonsterState.Idle:
-                    UpdateIdle();
+                case E_MonsterState.Notice:
+                    UpdateNotice();
                     break;
                 case E_MonsterState.Battle:
                     UpdateBattle();
                     break;
-                case E_MonsterState.BattleWait:
-                    UpdateAttack();
-                    break;
                 case E_MonsterState.Run:
                     UpdateRun();
-                    break;
-                case E_MonsterState.Dead:
-                    UpdateDead();
                     break;
             }
 
@@ -90,9 +78,15 @@ public class Creature : InteractionObject
         }
     }
 
-    protected virtual void UpdateIdle()
+    protected float noticeElaspedTime = 0; 
+    protected void UpdateNotice()
     {
+        noticeElaspedTime += Time.deltaTime;
+
+        if (noticeElaspedTime >= detectionTime)
+            NoticeAction();
     }
+
     [SerializeField] private Image coolTimeImage;
     [SerializeField] TextMeshProUGUI coolTimeText;
     private float elaspedTime = 0;
@@ -112,18 +106,12 @@ public class Creature : InteractionObject
             coolTimeText.text = (attackTime - elaspedTime).ToString("F2");
         }
     }
-
-    protected virtual void UpdateAttack()
-    {
-
-    }
     protected virtual void UpdateRun()
     {
         transform.Translate(runDirection * speed);
-    }
-    protected virtual void UpdateDead()
-    {
 
+        if(Managers.Game.CheckOutArea(transform.position))
+            DestoryObject();
     }
     #endregion
 
@@ -136,21 +124,28 @@ public class Creature : InteractionObject
 
             switch (monsterState)
             {
-                case E_MonsterState.Run:
-                    EnterRun();
+                case E_MonsterState.Notice:
+                    EnterNotice();
                     break;
                 case E_MonsterState.Battle:
                     EnterBattle();
                     break;
                 case E_MonsterState.BattleWait:
-                    EnterWait();
+                    EnterBattleWait();
+                    break;
+                case E_MonsterState.Run:
+                    EnterRun();
                     break;
                 case E_MonsterState.Dead:
-                case E_MonsterState.SucessRun:
                     DestoryObject();
                     break;
             }
         }
+    }
+
+    public void EnterNotice()
+    {
+        text.color = Color.gray;
     }
 
     private Vector2 runDirection;
@@ -160,35 +155,28 @@ public class Creature : InteractionObject
         Vector2 centerToObject = (Vector2)transform.position - (Vector2)Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 0));
         runDirection = centerToObject.normalized;
     }
-
     public void EnterBattle()
     {
         text.color = Color.red;
-
-        Managers.Battle.BattleStart();
-        Managers.Game.GameStateEnter(E_AreaState.Battle_Start);
     }
 
-    public void EnterWait()
+    public void EnterBattleWait()
     {
         text.color = Color.yellow;
     }
 
     public override void DestoryObject()
     {
-        base.DestoryObject();
         OnDestoryEvent?.Invoke(this);
-        Managers.Object.Despawn(this);
+
+        base.DestoryObject();
     }
 
     #endregion
 
-    #region 상태 
-    [Header("확인용-현재상태")]
-    [SerializeField] protected E_MonsterState currentState = E_MonsterState.None;
-    public E_MonsterState CurrentState { get => currentState; }
+    #region 행동 
 
-    public bool Detect()
+    public override bool Detect()
     {
         if (currentState == E_MonsterState.Idle)
             return UnityEngine.Random.value <= detectValue / 100f;
@@ -196,21 +184,27 @@ public class Creature : InteractionObject
             return false;
     }
 
-    public void DetectAction()
+    public override void DetectAction()
     {
-        if (CurrentState == E_MonsterState.Idle)
-            StartCoroutine(DetectionCoroutine());
+        SetState(E_MonsterState.Notice);
     }
 
-    public virtual IEnumerator DetectionCoroutine()
+    public virtual void NoticeAction()
     {
-        yield return new WaitForSeconds(detectionTime);
         SetState(E_MonsterState.Battle);
     }
 
     public virtual void DamagedAction()
     {
-        SetState(E_MonsterState.Battle);
+        if (currentState == E_MonsterState.Battle)
+        {
+
+        }
+        else
+        {
+            SetState(E_MonsterState.Battle);
+            Managers.Area.BattleStart();
+        }
     }
     #endregion
 
@@ -232,7 +226,7 @@ public class Creature : InteractionObject
     {
         for(int i = 0; i < parts.Count; i++)
         {
-            if (parts[i].PartType == partType)
+            if (parts[i].PartType == partType && parts[i].IsBroken == false)
                 return true;
         }
         return false;
@@ -243,9 +237,19 @@ public class Creature : InteractionObject
         Part part = null;
         for (int i = 0; i < parts.Count; i++)
         {
-            if (parts[i].PartType == partType)
+            if (parts[i].PartType == partType && parts[i].IsBroken == false)
                 return parts[i];
         }
         return part;
     }
+
+    #region UI
+    protected CreaturePartUi partUi;
+
+    public CreaturePartUi PartUi { get => partUi; }
+    public void Open(bool isOn)
+    {
+        partUi.OpenClose(isOn);
+    }
+    #endregion
 }
